@@ -1,0 +1,21 @@
+rules_version = '2';
+
+// Only the two of you can read or change the planner.
+// Replace the two addresses with your Google account emails, then paste this
+// whole file into Firebase console > Firestore Database > Rules and press Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isUs() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'your.email@gmail.com',
+          'fiance.email@gmail.com'
+        ];
+    }
+
+    match /{document=**} {
+      allow read, write: if isUs();
+    }
+  }
+}
