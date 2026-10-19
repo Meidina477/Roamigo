@@ -1,4 +1,4 @@
-// Data layer for Roamigo.
+// Data layer for M&R Away.
 // With a Firebase config: Google sign-in + Firestore, synced live between devices.
 // Without one: a demo store in this browser's localStorage, seeded with sample trips.
 // Both expose the same small API the page uses: db.collection(path) / db.doc(path),

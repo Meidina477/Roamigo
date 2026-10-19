@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Our shared travel planner: trips, tickets, budget, day-by-day plans, maps and a bucket list.">
 <meta name="theme-color" content="#4A2924">
-<title>Roamigo</title>
+<title>M&amp;R Away</title>
 <style>
 @font-face{font-family:'Manrope';src:url('fonts/manrope.ttf') format('truetype');font-weight:200 800;font-display:swap}
 @font-face{font-family:'Nice Memory';src:url('fonts/nice-memory.ttf') format('truetype');font-weight:400;font-display:swap}
@@ -329,16 +329,39 @@ a.credit{text-decoration:underline;text-underline-offset:2px}
 .empty p{color:var(--muted);font:400 .9375rem/1.7 var(--f-type)}
 .skeleton{display:grid;place-items:center;min-height:50vh;text-align:center}
 .skeleton b{display:block;font:400 3rem/1.25 var(--f-hand);color:var(--red-ink);margin-bottom:6px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* motion: things ease in when you open a page or tab, never on background data updates */
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes sheet-up{from{opacity:0;transform:translateY(28px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+#app.enter>*{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+#app.enter>*:nth-child(2){animation-delay:.07s} #app.enter>*:nth-child(3){animation-delay:.14s}
+#app.enter>*:nth-child(4){animation-delay:.21s} #app.enter>*:nth-child(5){animation-delay:.28s} #app.enter>*:nth-child(n+6){animation-delay:.35s}
+#app.enter .stamps>*,#app.enter .blist>*,#app.enter .stop,#app.enter .pass,#app.enter .mapcard,#app.enter .ledger li{animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+#app.enter .stamps>:nth-child(2),#app.enter .blist>:nth-child(2),#app.enter .passes>:nth-child(2),#app.enter .maps>:nth-child(2){animation-delay:.08s}
+#app.enter .stamps>:nth-child(3),#app.enter .blist>:nth-child(3),#app.enter .passes>:nth-child(3),#app.enter .maps>:nth-child(3){animation-delay:.16s}
+#app.enter .stamps>:nth-child(n+4),#app.enter .blist>:nth-child(n+4),#app.enter .passes>:nth-child(n+4),#app.enter .maps>:nth-child(n+4){animation-delay:.24s}
+#app.enter-tab .tabs-wrap~*{animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
+#app.enter .meter-bar span,#app.enter-tab .meter-bar span,#app.enter .cat-row .bar i,#app.enter-tab .cat-row .bar i{transform-origin:left;animation:grow 1s cubic-bezier(.2,.7,.2,1) .2s both}
+#app.enter .hero-place{animation:rise .7s cubic-bezier(.2,.7,.2,1) .1s both}
+.scrim{animation:fade .2s ease-out both}
+.sheet{animation:sheet-up .35s cubic-bezier(.2,.8,.2,1) both}
+.toast:not([hidden]){animation:rise .3s cubic-bezier(.2,.8,.2,1) both}
+.btn,.icon-btn,.seg,.stamp,.mark,.add-line,.check,.back{transition:transform .15s ease,background-color .2s,color .2s,border-color .2s}
+.btn:active,.icon-btn:active,.seg:active,.stamp:active,.mark:active,.add-line:active,.check:active{transform:scale(.96)}
+.check input:checked{animation:pop .35s ease-out}
+.stamp-art img{transition:opacity .5s ease}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
 <header class="mast" id="mast">
   <div class="wrap">
-    <button class="brand" data-act="go" data-to="home" aria-label="Roamigo, all trips">
+    <button class="brand" data-act="go" data-to="home" aria-label="M&amp;R Away, all trips">
       <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 14.2c8.4-.6 17-.4 25.3.3.6 5.6.5 13.4-.3 18.9-8.2.7-17.1.8-24.6.1-.8-6.1-.9-13.3-.4-19.3Z"/><path d="M15.4 13.9c-.2-2.6.1-4.6.6-6.4 2.6-.4 5.4-.4 8.1.1.5 1.9.6 4 .4 6.4"/><path d="M13.6 14.7c.3 6.1.2 12.6-.2 18.6M26.8 14.7c.4 6 .3 12.6-.1 18.5"/><path d="M11 34.2v2.1M29.6 34.1v2.2"/></svg>
-      <b>Roamigo</b>
+      <b>M&amp;R Away</b>
     </button>
     <nav class="nav" aria-label="Sections">
       <button class="seg" data-act="go" data-to="home" id="nav-home">Trips</button>
@@ -662,6 +685,7 @@ function openTrip(id) {
 
 /* ---------- routing ---------- */
 function go(view, id) {
+  S.anim = 'view';
   S.view = view;
   if (view === 'trip') openTrip(id);
   const h = view === 'trip' ? 'trip-' + id : view === 'bucket' ? 'bucket' : '';
@@ -696,9 +720,19 @@ function render() {
   if (S.noDb) { app.innerHTML = `<div class="notice"><h2>Couldn’t load the planner</h2><p class="prose quiet" style="margin:0 auto">${esc(S.err || 'Check your connection and reload.')}</p></div>`; return; }
   if (!S.loaded.trips) return;
   const html = S.view === 'trip' ? viewTrip() : S.view === 'bucket' ? viewBucket() : viewHome();
-  if (html === render.last && app.firstChild) return;
+  if (html === render.last && app.firstChild) { S.anim = null; return; }
   render.last = html; app.innerHTML = html;
+  app.classList.remove('enter', 'enter-tab');
+  if (S.anim) { void app.offsetWidth; app.classList.add(S.anim === 'tab' ? 'enter-tab' : 'enter'); if (S.anim === 'view') countUp(); S.anim = null; }
   if (S.view === 'home') animateRunway();
+}
+/* the countdown number counts up to today's value when you open the home page */
+function countUp() {
+  const el = document.querySelector('.count-n[data-n]'), n = el ? parseInt(el.dataset.n, 10) : NaN;
+  if (!el || !(n > 1) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const t0 = performance.now(), dur = Math.min(1400, 500 + n * 12);
+  const step = t => { if (!el.isConnected) return; const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(n * e); if (k < 1) requestAnimationFrame(step); };
+  el.textContent = '0'; requestAnimationFrame(step);
 }
 function renderFoot() {
   const f = $('#foot'); if (!f) return;
@@ -747,7 +781,7 @@ function viewHome() {
         <dl class="facts"><div><dt class="lbl">Where</dt><dd class="title">${esc(next.place || 'Not set')}</dd></div><div><dt class="lbl">When</dt><dd class="title num">${esc(dateRange(next))}</dd></div><div><dt class="lbl">Budget</dt><dd class="title num">${next.budget ? esc(money(next.budget, next.currency)) : 'Not set'}</dd></div></dl>
         <div><button class="btn" data-act="trip" data-id="${esc(next.id)}">Open the plan</button></div></div>
       <div class="hero-r ${HERO_VIDEO ? 'has-video' : ''}">${heroVideo()}<span class="lbl">Countdown</span>${HERO_VIDEO ? '' : runway(next, p)}
-        <div class="count num">${big}<small>${esc(cap)}</small></div></div></section>`;
+        <div class="count num"><span class="count-n" data-n="${typeof big === 'number' ? big : ''}">${big}</span><small>${esc(cap)}</small></div></div></section>`;
   } else {
     hero = `<section class="hero"><div class="hero-l"><span class="lbl">Next trip</span><h1 class="hero-place">Nowhere yet</h1><p class="prose quiet">Add your first trip with dates and it will count down here. Flights, the daily plan and the budget all live inside each trip.</p><div>${addBtn('new-trip', 'Plan a trip')}</div></div>
       <div class="hero-r ${HERO_VIDEO ? 'has-video' : ''}">${heroVideo()}<span class="lbl">Countdown</span>${HERO_VIDEO ? '' : runway(null, {k:'undated'})}<div class="count">TBD<small>Waiting for your dates</small></div></div></section>`;
@@ -1131,7 +1165,7 @@ document.addEventListener('click', async ev => {
   switch (a) {
     case 'go': return go(el.dataset.to);
     case 'trip': return go('trip', id);
-    case 'tab': S.tab = el.dataset.tab; render(); presence(); return;
+    case 'tab': if (S.tab !== el.dataset.tab) { S.tab = el.dataset.tab; S.anim = 'tab'; render(); presence(); } return;
     case 'names': return W() && namesForm();
     case 'new-trip': return tripForm(null);
     case 'edit-trip': return tripForm(tripById(S.tripId));

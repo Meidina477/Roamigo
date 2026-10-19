@@ -1,4 +1,4 @@
-# Roamigo
+# M&R Away
 
 A travel planner for two. Trips, tickets, a shared budget, a day-by-day plan with route maps, and a bucket list. Both of you can edit at the same time and see each other's changes straight away.
 
